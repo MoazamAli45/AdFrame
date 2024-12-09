@@ -50,6 +50,9 @@ const Navbar = async () => {
                       {user?.email || "EMAIL ADDRESS"}
                     </DropdownMenuItem>
                     <DropdownMenuItem>
+                      <Link href="/advertisement">Dashboard</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
                       <Link href="/api/auth/logout">Sign out</Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
