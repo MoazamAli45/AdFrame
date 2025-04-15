@@ -32,11 +32,6 @@ const sidebarItems = [
     path: "/advertisement/your-posters",
     icon: FilePlus,
   },
-  {
-    title: "Settings",
-    path: "/advertisement/settings",
-    icon: Settings,
-  },
 ];
 
 export function Sidebar() {

@@ -1,54 +1,118 @@
-import { Button } from "@/components/ui/button";
-import React from "react";
-import realestate from "../../../../public/assets/realestate.jpg";
-import Image from "next/image";
-import { Download, Trash2 } from "lucide-react";
+"use client";
 
-function page() {
-  const postersArr = [
-    { id: 1, title: "Poster 1", createdAt: "9/11/2024", imgSrc: realestate },
-    { id: 2, title: "Poster 2", createdAt: "9/11/2024", imgSrc: realestate },
-    { id: 3, title: "Poster 3", createdAt: "9/11/2024", imgSrc: realestate },
-    // Add more posters here...
-  ];
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Trash2 } from "lucide-react";
+import Image from "next/image";
+
+export default function MyPosters() {
+  const [posters, setPosters] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const fetchPosters = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch("/api/user/posters");
+
+        console.log("RESPONSE", response);
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch posters");
+        }
+
+        const data = await response.json();
+
+        console.log("DATA", data);
+        setPosters(data.posters || []);
+      } catch (error) {
+        toast.error("Failed to load your posters");
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPosters();
+  }, []);
+
+  const handleDeletePoster = async (posterUrl) => {
+    try {
+      setIsDeleting(true);
+
+      const response = await fetch("/api/user/posters", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ posterUrl }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete poster");
+      }
+
+      // Update the local state to remove the deleted poster
+      setPosters(posters.filter((url) => url !== posterUrl));
+      toast.success("Poster deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete poster");
+      console.error(error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  if (isLoading) {
+    return <div className="text-center py-10">Loading your posters...</div>;
+  }
+
+  if (posters.length === 0) {
+    return (
+      <div className="text-center py-10">
+        <p className="text-gray-500 mb-4">You haven't saved any posters yet.</p>
+        <Button
+          variant="outline"
+          onClick={() => (window.location.href = "/advertisement/generate")}
+        >
+          Create Your First Poster
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold-text-gray-900">My Posters</h1>
-      <div className="bg-white rounded-lg shadow-lg space-y-4 py-6 w-full">
-        <Button className="w-[95%] mx-auto block text-xl">+ New Poster</Button>
-        <div className="flex flex-col gap-4">
-          {postersArr.map((poster) => (
-            <div
-              key={poster.id}
-              className="w-[95%] mx-auto border-gray-400 border rounded p-4 flex flex-col sm:flex-row gap-4 items-center"
-            >
+      <h2 className="text-2xl font-bold">My Saved Posters</h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {posters.map((posterUrl, index) => (
+          <div key={index} className="relative group">
+            <div className="aspect-[3/4] relative rounded-lg overflow-hidden border border-gray-200">
               <Image
-                src={poster.imgSrc}
-                className="cursor-pointer w-[170px] sm:w-[200px]"
+                src={posterUrl || "/placeholder.svg"}
+                alt={`Poster ${index + 1}`}
+                fill
+                className="object-cover"
               />
-              <div className="flex flex-col gap-4">
-                <div className="text-xl sm:text-2xl text-gray-900">
-                  {poster.title}
-                </div>
-                <div className="text-gray-600 text-[12px] sm:text-sm">
-                  Created At: {poster.createdAt}
-                </div>
-                <div className="flex sm:flex-row flex-col gap-2">
-                  <Button>
-                    <Download size={20} className="mr-2" /> Download
-                  </Button>
-                  <Button>
-                    {" "}
-                    <Trash2 size={20} className="mr-2" /> Delete
-                  </Button>
-                </div>
-              </div>
             </div>
-          ))}
-        </div>
+
+            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => handleDeletePoster(posterUrl)}
+                disabled={isDeleting}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
-
-export default page;

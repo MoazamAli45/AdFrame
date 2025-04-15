@@ -1,8 +1,8 @@
+"use client";
 import Link from "next/link";
 import MaxWidthWrapper from "./MaxWidthWrapper";
 import { Button, buttonVariants } from "../ui/button";
 import { ArrowRight } from "lucide-react";
-import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,11 +11,26 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import Image from "next/image";
+import { useAuth } from "@/hooks/useAuth";
+import axios from "axios";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-const Navbar = async () => {
-  const { getUser } = getKindeServerSession();
-  // const user = false;
-  const user = await getUser();
+const Navbar = () => {
+  const { user } = useAuth();
+
+  const router = useRouter();
+
+  const handlelogout = async () => {
+    try {
+      const data = await axios.get("/api/logout");
+      toast.success("LOGOUT SUCCESSFLLY!");
+      window.location.href = "/login";
+    } catch (error) {
+      console.log("ERROR", error);
+      toast.error(`ERROR ${error}`);
+    }
+  };
 
   return (
     <nav className="sticky z-[100] h-14 inset-x-0 top-0 w-full border-b border-gray-200 bg-white/75 backdrop-blur-lg transition-all">
@@ -28,40 +43,17 @@ const Navbar = async () => {
           <div className="h-full flex items-center space-x-4">
             {user ? (
               <>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="overflow-hidden rounded-full"
-                    >
-                      <Image
-                        src={user?.picture ? user?.picture : "/placeholder.png"}
-                        width={36}
-                        height={36}
-                        alt="Avatar"
-                        className="overflow-hidden rounded-full"
-                      />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuItem>
-                      {user?.email || "EMAIL ADDRESS"}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Link href="/advertisement">Dashboard</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Link href="/api/auth/logout">Sign out</Link>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Button onClick={() => router.push("/advertisement")}>
+                  Dashboard
+                </Button>
+                <Button className="bg-red-600" onClick={() => handlelogout()}>
+                  Logout{" "}
+                </Button>
               </>
             ) : (
               <>
                 <Link
-                  href={"/api/auth/login"}
+                  href={"/login"}
                   className={buttonVariants({
                     size: "sm",
                     variant: "ghost",
@@ -73,7 +65,7 @@ const Navbar = async () => {
                 <div className="h-8 w-px bg-zinc-200 hidden sm:block" />
 
                 <Link
-                  href={"/api/auth/register"}
+                  href={"/signup"}
                   className={buttonVariants({
                     size: "sm",
                     className: "hidden sm:flex items-center gap-1",

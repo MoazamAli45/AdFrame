@@ -130,7 +130,7 @@ const RealEstatePosterGenerator = () => {
 
   return (
     <div className="w-full max-w-6xl mx-auto p-4">
-      <div className="bg-white p-5 rounded-lg shadow-lg min-h-[600px] flex flex-col">
+      <div className="bg-white p-5 rounded-lg shadow-lg  flex flex-col">
         <div className="text-center text-4xl font-bold mb-8">
           <h1>
             <span className="text-[#16A34A]">Revolutionizing</span> Real Estate
