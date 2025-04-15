@@ -17,16 +17,20 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 const Navbar = () => {
-  const { user ,refresh} = useAuth();
+  const { user, refresh } = useAuth();
 
   const router = useRouter();
 
   const handlelogout = async () => {
     try {
-      await axios.get("/api/logout");
-      // Trigger a refresh of auth state
+      console.log("Starting logout process");
+      const response = await axios.get("/api/logout");
+      console.log("Logout API response:", response);
+      toast.success("LOGGED OUT SUCCESSFULLY!");
+      console.log("Redirecting to login page");
       refresh();
       toast.success("LOGGED OUT SUCCESSFULLY!");
+
       router.push("/login");
     } catch (error) {
       console.error("ERROR", error);
